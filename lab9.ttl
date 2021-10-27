@@ -1,6 +1,6 @@
-@base <http://users.dcc.uchile.cl/~ahogan/foaf.ttl> .
+@base <https://javierdiazparada.github.io/lab9.ttl> .
 
-@prefix ah: <http://users.dcc.uchile.cl/~ahogan/foaf.ttl#> .
+@prefix jd: <https://javierdiazparada.github.io/lab9.ttl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
@@ -13,10 +13,10 @@
 <> a foaf:Document ;
    dc:date "2021-10-27"^^xsd:date ;
    dc:title "Aidan's FOAF Profile"@en ;
-   foaf:primaryTopic <#ah> ;
-   dc:creator <#ah> .
+   foaf:primaryTopic <#jd> ;
+   dc:creator <#jd> .
 
-<#ah> a foaf:Person ;
+<#jd> a foaf:Person ;
    rdfs:label "Aidan Hogan" ;
    rdfs:comment "Associate Professor of the DCC"@es , "Profesor Asociado del DCC"@es ;
    foaf:name "Aidan Hogan" ;
