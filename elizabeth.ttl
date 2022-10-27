@@ -27,4 +27,4 @@
    foaf:knows <https://javierdiazparada.github.io/chavo.ttl> , <https://javierdiazparada.github.io/cokemend.ttl> , <https://javierdiazparada.github.io/kanye.ttl> ;
    foaf:interest dbr:Monarchy , dbr:Colonialism , dbr:Imperialism ; 
    social:hasEnemy <https://javierdiazparada.github.io/kanye.ttl#kw> ;
-   social:likesMovie dbr:The_King's_Speech .
+   social:likesMovie dbr:Bohemian_Rhapsody_(film) .
