@@ -24,7 +24,7 @@
    foaf:familyName "Windsor" ;
    foaf:age 96 ;
    foaf:img <https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Queen_Elizabeth_II_official_portrait_for_1959_tour_%28retouched%29_%28cropped%29_%283-to-4_aspect_ratio%29.jpg/704px-Queen_Elizabeth_II_official_portrait_for_1959_tour_%28retouched%29_%28cropped%29_%283-to-4_aspect_ratio%29.jpg> ;
-   foaf:knows <https://javierdiazparada.github.io/chavo.ttl>, <https://javierdiazparada.github.io/cokemend.ttl>, <https://javierdiazparada.github.io/kanye.ttl> ;
+   foaf:knows <https://javierdiazparada.github.io/chavo.ttl> , <https://javierdiazparada.github.io/cokemend.ttl> , <https://javierdiazparada.github.io/kanye.ttl> ;
    foaf:interest dbr:Monarchy , dbr:Colonialism , dbr:Imperialism ; 
    social:hasEnemy <https://javierdiazparada.github.io/kanye.ttl#kw> ;
    social:likesMovie dbr:The_King's_Speech .
