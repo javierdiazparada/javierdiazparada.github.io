@@ -24,6 +24,6 @@
    foaf:familyName "Mendoza" ;
    foaf:age 54 ;
    foaf:img <https://upload.wikimedia.org/wikipedia/commons/d/d1/Gabriel_Mendoza.jpg> ;
-   foaf:knows <https://javierdiazparada.github.io/chavo.ttl> <https://javierdiazparada.github.io/elizabeth.ttl> <https://javierdiazparada.github.io/kanye.ttl> ;
+   foaf:knows <https://javierdiazparada.github.io/chavo.ttl>, <https://javierdiazparada.github.io/elizabeth.ttl>, <https://javierdiazparada.github.io/kanye.ttl> ;
    foaf:interest dbr:Spaghetti , dbr:Chile_national_football_team , dbr:Reality_television ; 
    social:hasEnemy <https://javierdiazparada.github.io/chavo.ttl#jd> .
