@@ -26,7 +26,7 @@
    foaf:nick "Chavo" ;
    foaf:currentProject "Learn Rust" ;
    foaf:img <https://javierdiazparada.github.io/photo.png> ;
-   foaf:knows <http://users.dcc.uchile.cl/~ahogan/foaf.ttl> <https://javierdiazparada.github.io/chavo.ttl> <https://javierdiazparada.github.io/cokemend.ttl> <https://javierdiazparada.github.io/elizabeth.ttl> <https://javierdiazparada.github.io/kanye.ttl>;
+   foaf:knows <http://users.dcc.uchile.cl/~ahogan/foaf.ttl> <https://javierdiazparada.github.io/chavo.ttl> <https://javierdiazparada.github.io/cokemend.ttl> <https://javierdiazparada.github.io/elizabeth.ttl> <https://javierdiazparada.github.io/kanye.ttl> ;
    foaf:interest dbr:Semantic_Web , dbr:Communism , dbr:Anarchy ; 
    social:hasEnemy <http://users.dcc.uchile.cl/~ahogan/abot.ttl#ab> ;
    social:hasSpiritAnimal dbr:Kodiak_bear ;
