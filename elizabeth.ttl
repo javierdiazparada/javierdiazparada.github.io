@@ -1,0 +1,30 @@
+@base <https://javierdiazparada.github.io/elizabeth.ttl> .
+
+@prefix queen: <https://javierdiazparada.github.io/elizabeth.ttl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix social: <http://users.dcc.uchile.cl/~ahogan/social.ttl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix wd: <http://www.wikidata.org/entity/>.
+@prefix dbr: <http://dbpedia.org/resource/>.
+
+<> a foaf:Document ;
+   dc:date "2022-10-26"^^xsd:date ;
+   dc:title "The Queen's FOAF Profile"@en ;
+   foaf:primaryTopic <#queen> ;
+   dc:creator <#jd> .
+
+<#queen> a foaf:Person ;
+   rdfs:label "Queen Elizabeth the second, of the United Kingdom" ;
+   rdfs:comment "Head of the Commonwealth"@en ;
+   foaf:name "Elizabeth Alexandra Mary Windsor Bowes-Lyon" ;
+   foaf:givenName "Elizabeth" ;
+   foaf:familyName "Windsor" ;
+   foaf:age 96 ;
+   foaf:img <https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Queen_Elizabeth_II_official_portrait_for_1959_tour_%28retouched%29_%28cropped%29_%283-to-4_aspect_ratio%29.jpg/704px-Queen_Elizabeth_II_official_portrait_for_1959_tour_%28retouched%29_%28cropped%29_%283-to-4_aspect_ratio%29.jpg> ;
+   foaf:knows <https://javierdiazparada.github.io/chavo.ttl> <https://javierdiazparada.github.io/cokemend.ttl> <https://javierdiazparada.github.io/kanye.ttl> ;
+   foaf:interest dbr:Monarchy , dbr:Colonialism , dbr:Imperialism ; 
+   social:hasEnemy <https://javierdiazparada.github.io/kanye.ttl#kw> ;
+   social:likesMovie dbr:The_King's_Speech .

@@ -1,0 +1,29 @@
+@base <https://javierdiazparada.github.io/cokemend.ttl> .
+
+@prefix cm: <https://javierdiazparada.github.io/cokemend.ttl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix social: <http://users.dcc.uchile.cl/~ahogan/social.ttl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix wd: <http://www.wikidata.org/entity/>.
+@prefix dbr: <http://dbpedia.org/resource/>.
+
+<> a foaf:Document ;
+   dc:date "2022-10-26"^^xsd:date ;
+   dc:title "Coca's FOAF Profile"@en ;
+   foaf:primaryTopic <#cm> ;
+   dc:creator <#jd> .
+
+<#cm> a foaf:Person ;
+   rdfs:label "Coca Mendoza" ;
+   rdfs:comment "Retired soccer player"@en , "Ex Futbolista"@es ;
+   foaf:name "Gabriel Mendoza" ;
+   foaf:givenName "Gabriel" ;
+   foaf:familyName "Mendoza" ;
+   foaf:age 54 ;
+   foaf:img <https://upload.wikimedia.org/wikipedia/commons/d/d1/Gabriel_Mendoza.jpg> ;
+   foaf:knows <https://javierdiazparada.github.io/chavo.ttl> <https://javierdiazparada.github.io/elizabeth.ttl> <https://javierdiazparada.github.io/kanye.ttl> ;
+   foaf:interest dbr:Spaghetti , dbr:Chile_national_football_team , dbr:Reality_television ; 
+   social:hasEnemy <https://javierdiazparada.github.io/chavo.ttl#jd> .

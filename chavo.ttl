@@ -1,4 +1,4 @@
-@base <https://javierdiazparada.github.io/lab9.ttl> .
+@base <https://javierdiazparada.github.io/chavo.ttl> .
 
 @prefix jd: <https://javierdiazparada.github.io/lab9.ttl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -11,23 +11,24 @@
 @prefix dbr: <http://dbpedia.org/resource/>.
 
 <> a foaf:Document ;
-   dc:date "2021-10-31"^^xsd:date ;
+   dc:date "2022-10-26"^^xsd:date ;
    dc:title "Javier's FOAF Profile"@en ;
    foaf:primaryTopic <#jd> ;
    dc:creator <#jd> .
 
 <#jd> a foaf:Person ;
    rdfs:label "Javier Diaz" ;
-   rdfs:comment "Sixth year DCC student"@en , "Estudiante de sexto año del DCC"@es ;
+   rdfs:comment "Seventh year DCC student"@en , "Estudiante de septimo año del DCC"@es ;
    foaf:name "Javier Díaz" ;
    foaf:givenName "Javier" ;
    foaf:familyName "Díaz" ;
-   foaf:age 24 ;
-   foaf:img <http://aidanhogan.com/img/me-sp.png> ;
-   foaf:knows <https://users.dcc.uchile.cl/~dhernand/foaf.ttl#dh> , <http://anakena.dcc.uchile.cl/~jasalas/web/foaf.ttl#me> ;
-   foaf:interest dbr:Semantic_Web , dbr:Big_data , dbr:Hurling ; 
+   foaf:age 25 ;
+   foaf:nick "Chavo" ;
+   foaf:currentProject "Learn Rust" ;
+   foaf:img <https://javierdiazparada.github.io/photo.png> ;
+   foaf:knows <http://users.dcc.uchile.cl/~ahogan/foaf.ttl> <https://javierdiazparada.github.io/chavo.ttl> <https://javierdiazparada.github.io/cokemend.ttl> <https://javierdiazparada.github.io/elizabeth.ttl> <https://javierdiazparada.github.io/kanye.ttl>;
+   foaf:interest dbr:Semantic_Web , dbr:Communism , dbr:Anarchy ; 
    social:hasEnemy <http://users.dcc.uchile.cl/~ahogan/abot.ttl#ab> ;
-   social:likesMovie dbr:Sharknado , dbr:Sharktopus , dbr:Dinoshark , dbr:Mega_Shark_Versus_Giant_Octopus ;
-   social:hasSpiritAnimal dbr:Zebroid ;
-   social:hasFavouritePlatonicSolid dbr:Dodecahedron ;
+   social:hasSpiritAnimal dbr:Kodiak_bear ;
+   social:hasFavouritePlatonicSolid dbr:Triangle ;
    foaf:myersBriggs "INTP" .
