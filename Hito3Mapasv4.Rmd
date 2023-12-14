@@ -1,0 +1,4599 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+```{r}
+install.packages("chilemapas")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("readxl")
+```
+Limpiamos y formateamos el data set:
+
+```{r}
+library(chilemapas)
+library(dplyr)
+library(ggplot2)
+library(readxl)
+BDPROY2 <- suppressWarnings(read_excel("C:/Users/Chavo/PycharmProjects/Hito2/BDPROY2.xlsx"))
+clean_data <- BDPROY2 %>%  filter(!is.na(TipoLiceo))
+```
+
+```{r}
+df <- subset(clean_data, select = c('COD_REG_RBD', 'COD_COM_LIC', 'COD_COM_VIV', 'nomb_inst', 'Carrera'))
+colnames(df) <- c("COD_REG", "COD_LIC","COD_VIV", "NOM_INS", "CAR")
+df$ID <- 1:nrow(df)
+
+codigos <- codigos_territoriales
+colnames(codigos) <- c('COD_COM','NOM_COM','COD_PRO', 'NOM_PRO', 'COD_REG', 'NOM_REG')
+
+carrera <- subset(select(df, ID, NOM_INS, CAR))
+carrera$CAR <- toupper(carrera$CAR)
+
+liceo <- subset(select(df, ID, COD_LIC))
+colnames(liceo) <- c('ID','COD_COM')
+liceo$COD_COM <- formatC(liceo$COD_COM, width = 5, format = 'd', flag = '0')
+
+vivienda <- subset(select(df, ID, COD_VIV))
+colnames(vivienda) <- c('ID','COD_COM')
+vivienda$COD_COM <- formatC(vivienda$COD_COM, width = 5, format = 'd', flag = '0')
+
+liceo <- merge(x=liceo,y=codigos,by="COD_COM")
+vivienda <- merge(x=vivienda,y=codigos,by="COD_COM")
+
+liceo <- merge(x=liceo,y=carrera,by="ID")
+vivienda <- merge(x=vivienda,y=carrera,by="ID")
+
+paleta_lic <- c("#A569BD", "#BB8FCE", "#E8DAEF", "#F5EEF8", "#F0F3F4")
+paleta_viv <- c("#186A3B", "#1D8348", "#58D68D", "#ABEBC6", "#D5F5E3")
+
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_tarapaca <- liceo %>% 
+  filter(COD_REG == "01") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_tarapaca %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_tarapaca %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_tarapaca %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_tarapaca %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_tarapaca %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_tarapaca %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_tarapaca %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_tarapaca %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_tarapaca %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_tarapaca %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_tarapaca %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_tarapaca %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_tarapaca %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_tarapaca_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_tarapaca_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_tarapaca_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_tarapaca_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_tarapaca <- vivienda %>% 
+  filter(COD_REG == "01") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_tarapaca %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_tarapaca %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_tarapaca %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_tarapaca %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_tarapaca %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_tarapaca %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_tarapaca %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_tarapaca %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_tarapaca %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_tarapaca %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_tarapaca %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_tarapaca %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_tarapaca %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_tarapaca_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_tarapaca_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_tarapaca_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_tarapaca_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_tarapaca_df <- as.data.frame(table(lic_tarapaca$COD_COM))
+colnames(lic_tarapaca_df) <- c('codigo_comuna','cantidad')
+
+lic_com_tarapaca <- mapa_comunas %>%
+  filter(codigo_region == "01") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_tarapaca_df)
+
+ggplot(lic_com_tarapaca) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-70.35, -68.45)) +
+  scale_y_continuous(limits = c(-19, -21.6))
+
+viv_tarapaca_df <- as.data.frame(table(viv_tarapaca$COD_COM))
+colnames(viv_tarapaca_df) <- c('codigo_comuna','cantidad')
+
+viv_com_tarapaca <- mapa_comunas %>%
+  filter(codigo_region == "01") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_tarapaca_df)
+
+
+ggplot(viv_com_tarapaca) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-70.35, -68.45)) +
+  scale_y_continuous(limits = c(-19, -21.6))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_antofagasta <- liceo %>% 
+  filter(COD_REG == "02") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_antofagasta %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_antofagasta %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_antofagasta %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_antofagasta %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_antofagasta %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_antofagasta %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_antofagasta %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_antofagasta %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_antofagasta %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_antofagasta %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_antofagasta %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_antofagasta %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_antofagasta %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_antofagasta_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_antofagasta_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_antofagasta_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_antofagasta_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_antofagasta <- vivienda %>% 
+  filter(COD_REG == "02") %>% 
+  group_by(COD_COM)
+
+
+estudiantes_UDD <- viv_antofagasta %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_antofagasta %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_antofagasta %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_antofagasta %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_antofagasta %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_antofagasta %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_antofagasta %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_antofagasta %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_antofagasta %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_antofagasta %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_antofagasta %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_antofagasta %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_antofagasta %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_antofagasta_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_antofagasta_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_antofagasta_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_antofagasta_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_antofagasta_df <- as.data.frame(table(lic_antofagasta$COD_COM))
+colnames(lic_antofagasta_df) <- c('codigo_comuna','cantidad')
+
+lic_com_antofagasta <- mapa_comunas %>%
+  filter(codigo_region == "02") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_antofagasta_df)
+
+ggplot(lic_com_antofagasta) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-70.75, -67)) +
+  scale_y_continuous(limits = c(-21, -26))
+
+viv_antofagasta_df <- as.data.frame(table(viv_antofagasta$COD_COM))
+colnames(viv_antofagasta_df) <- c('codigo_comuna','cantidad')
+
+viv_com_antofagasta <- mapa_comunas %>%
+  filter(codigo_region == "02") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_antofagasta_df)
+
+ggplot(viv_com_antofagasta) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-70.75, -67)) +
+  scale_y_continuous(limits = c(-21, -26))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_atacama <- liceo %>% 
+  filter(COD_REG == "03") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_atacama %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_atacama %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_atacama %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_atacama %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_atacama %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_atacama %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_atacama %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_atacama %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_atacama %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_atacama %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_atacama %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_atacama %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_atacama %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_atacama_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_atacama_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_atacama_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_atacama_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_atacama <- vivienda %>% 
+  filter(COD_REG == "03") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_atacama %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_atacama %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_atacama %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_atacama %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_atacama %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_atacama %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_atacama %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_atacama %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_atacama %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_atacama %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_atacama %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_atacama %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_atacama %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_atacama_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_atacama_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_atacama_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_atacama_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_atacama_df <- as.data.frame(table(lic_atacama$COD_COM))
+
+colnames(lic_atacama_df) <- c('codigo_comuna','cantidad')
+
+lic_com_atacama <- mapa_comunas %>%
+  filter(codigo_region == "03") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_atacama_df)
+
+ggplot(lic_com_atacama) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-71.5, -68.25)) +
+  scale_y_continuous(limits = c(-25.4, -29.5))
+
+viv_atacama_df <- as.data.frame(table(viv_atacama$COD_COM))
+colnames(viv_atacama_df) <- c('codigo_comuna','cantidad')
+
+viv_com_atacama <- mapa_comunas %>%
+  filter(codigo_region == "03") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_atacama_df)
+
+ggplot(viv_com_atacama) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-71.5, -68.25)) +
+  scale_y_continuous(limits = c(-25.4, -29.5))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_coquimbo <- liceo %>% 
+  filter(COD_REG == "01") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_coquimbo %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_coquimbo %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_coquimbo %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_coquimbo %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_coquimbo %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_coquimbo %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_coquimbo %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_coquimbo %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_coquimbo %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_coquimbo %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_coquimbo %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_coquimbo %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_coquimbo %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_coquimbo_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_coquimbo_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_coquimbo_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_coquimbo_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_coquimbo <- vivienda %>% 
+  filter(COD_REG == "04") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_coquimbo %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_coquimbo %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_coquimbo %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_coquimbo %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_coquimbo %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_coquimbo %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_coquimbo %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_coquimbo %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_coquimbo %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_coquimbo %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_coquimbo %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_coquimbo %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_coquimbo %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_coquimbo_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_coquimbo_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_coquimbo_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_coquimbo_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_coquimbo_df <- as.data.frame(table(lic_coquimbo$COD_COM))
+
+colnames(lic_coquimbo_df) <- c('codigo_comuna','cantidad')
+
+lic_com_coquimbo <- mapa_comunas %>%
+  filter(codigo_region == "04") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_coquimbo_df)
+
+ggplot(lic_com_coquimbo) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-69.8, -71.75)) +
+  scale_y_continuous(limits = c(-29.1, -32.25))
+
+viv_coquimbo_df <- as.data.frame(table(viv_coquimbo$COD_COM))
+colnames(viv_coquimbo_df) <- c('codigo_comuna','cantidad')
+
+viv_com_coquimbo <- mapa_comunas %>%
+  filter(codigo_region == "04") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_coquimbo_df)
+
+ggplot(viv_com_coquimbo) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-69.8, -71.75)) +
+  scale_y_continuous(limits = c(-29.1, -32.25))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_valparaiso <- liceo %>% 
+  filter(COD_REG == "05") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_valparaiso %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_valparaiso %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_valparaiso %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_valparaiso %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_valparaiso %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_valparaiso %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_valparaiso %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_valparaiso %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_valparaiso %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_valparaiso %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_valparaiso %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_valparaiso %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_valparaiso %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_valparaiso_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_valparaiso_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_valparaiso_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_valparaiso_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_valparaiso <- vivienda %>% 
+  filter(COD_REG == "05") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_valparaiso %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_valparaiso %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_valparaiso %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_valparaiso %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_valparaiso %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_valparaiso %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_valparaiso %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_valparaiso %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_valparaiso %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_valparaiso %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_valparaiso %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_valparaiso %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_valparaiso %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_valparaiso_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_valparaiso_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_valparaiso_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") + labs(y='Cantidad de Alumnos', x='Nombre de la Comuna', title='Alma mater según vivienda', subtitle='V Región de Valparaíso' , caption='Por Javier Díaz', fill='Institución' ) +
+coord_flip()
+ggsave("valpo.png")
+
+ggplot(data=viv_carreras_valparaiso_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_valparaiso_df <- as.data.frame(table(lic_valparaiso$COD_COM))
+colnames(lic_valparaiso_df) <- c('codigo_comuna','cantidad')
+
+lic_com_valparaiso <- mapa_comunas %>%
+  filter(codigo_region == "05") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_valparaiso_df)
+
+ggplot(lic_com_valparaiso) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-72, -70)) +
+  scale_y_continuous(limits = c(-34, -32))
+
+viv_valparaiso_df <- as.data.frame(table(viv_valparaiso$COD_COM))
+colnames(viv_valparaiso_df) <- c('codigo_comuna','cantidad')
+
+viv_com_valparaiso <- mapa_comunas %>%
+  filter(codigo_region == "05") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_valparaiso_df)
+
+ggplot(viv_com_valparaiso) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Dens. Alumnos") +
+  labs(x='Latitud', y='Longitud', title='Estudiantes en la educación superior según vivienda', subtitle='V Región de Valparaíso' , caption='Por Javier Díaz') +
+  scale_x_continuous(limits = c(-72, -70)) +
+  scale_y_continuous(limits = c(-34, -32)) 
+  
+ggsave("valpoMap.png")
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_libertador <- liceo %>% 
+  filter(COD_REG == "06") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_libertador %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_libertador %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_libertador %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_libertador %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_libertador %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_libertador %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_libertador %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_libertador %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_libertador %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_libertador %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_libertador %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_libertador %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_libertador %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_libertador_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_libertador_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_libertador_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_libertador_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_libertador <- vivienda %>% 
+  filter(COD_REG == "06") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_libertador %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_libertador %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_libertador %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_libertador %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_libertador %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_libertador %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_libertador %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_libertador %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_libertador %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_libertador %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_libertador %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_libertador %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_libertador %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_libertador_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_libertador_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_libertador_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_libertador_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_libertador_df <- as.data.frame(table(lic_libertador$COD_COM))
+colnames(lic_libertador_df) <- c('codigo_comuna','cantidad')
+
+lic_com_libertador <- mapa_comunas %>%
+  filter(codigo_region == "06") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_libertador_df)
+
+ggplot(lic_com_libertador) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-70.05, -72)) +
+  scale_y_continuous(limits = c(-33.8, -35))
+
+viv_libertador_df <- as.data.frame(table(viv_libertador$COD_COM))
+colnames(viv_libertador_df) <- c('codigo_comuna','cantidad')
+
+viv_com_libertador <- mapa_comunas %>%
+  filter(codigo_region == "06") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_libertador_df)
+
+ggplot(viv_com_libertador) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-70.05, -72)) +
+  scale_y_continuous(limits = c(-33.8, -35))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_maule <- liceo %>% 
+  filter(COD_REG == "07") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_maule %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_maule %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_maule %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_maule %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_maule %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_maule %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_maule %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_maule %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_maule %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_maule %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_maule %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_maule %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_maule %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_maule_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_maule_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_maule_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_maule_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_maule <- vivienda %>% 
+  filter(COD_REG == "07") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_maule %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_maule %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_maule %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_maule %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_maule %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_maule %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_maule %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_maule %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_maule %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_maule %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_maule %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_maule %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_maule %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_maule_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_maule_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_maule_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_maule_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_maule_df <- as.data.frame(table(lic_maule$COD_COM))
+colnames(lic_maule_df) <- c('codigo_comuna','cantidad')
+
+lic_com_maule <- mapa_comunas %>%
+  filter(codigo_region == "07") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_maule_df)
+
+ggplot(lic_com_maule) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio..") +
+  scale_x_continuous(limits = c(-70.3, -72.75)) +
+  scale_y_continuous(limits = c(-36.5, -34.75))
+
+viv_maule_df <- as.data.frame(table(viv_maule$COD_COM))
+colnames(viv_maule_df) <- c('codigo_comuna','cantidad')
+
+viv_com_maule <- mapa_comunas %>%
+  filter(codigo_region == "07") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_maule_df)
+
+ggplot(viv_com_maule) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-70.3, -72.75)) +
+  scale_y_continuous(limits = c(-36.5, -34.75))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_biobio <- liceo %>% 
+  filter(COD_REG == "08") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_biobio %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_biobio %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_biobio %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_biobio %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_biobio %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_biobio %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_biobio %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_biobio %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_biobio %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_biobio %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_biobio %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_biobio %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_biobio %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_biobio_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_biobio_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_biobio_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_biobio_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_biobio <- vivienda %>% 
+  filter(COD_REG == "09") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_biobio %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_biobio %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_biobio %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_biobio %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_biobio %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_biobio %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_biobio %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_biobio %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_biobio %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_biobio %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_biobio %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_biobio %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_biobio %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_biobio_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_biobio_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_biobio_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_biobio_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_biobio_df <- as.data.frame(table(lic_biobio$COD_COM))
+colnames(lic_biobio_df) <- c('codigo_comuna','cantidad')
+
+lic_com_biobio <- mapa_comunas %>%
+  filter(codigo_region == "08") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_biobio_df)
+
+ggplot(lic_com_biobio) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-71, -74)) +
+  scale_y_continuous(limits = c(-38.5, -36.5))
+
+viv_biobio_df <- as.data.frame(table(viv_biobio$COD_COM))
+colnames(viv_biobio_df) <- c('codigo_comuna','cantidad')
+
+viv_com_biobio <- mapa_comunas %>%
+  filter(codigo_region == "08") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_biobio_df)
+
+ggplot(viv_com_biobio) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-71, -74)) +
+  scale_y_continuous(limits = c(-38.5, -36.5))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_araucania <- liceo %>% 
+  filter(COD_REG == "09") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_araucania %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_araucania %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_araucania %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_araucania %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_araucania %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_araucania %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_araucania %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_araucania %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_araucania %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_araucania %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_araucania %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_araucania %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_araucania %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_araucania_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_araucania_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_araucania_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_araucania_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_araucania <- vivienda %>% 
+  filter(COD_REG == "09") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_araucania %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_araucania %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_araucania %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_araucania %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_araucania %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_araucania %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_araucania %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_araucania %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_araucania %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_araucania %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_araucania %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_araucania %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_araucania %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_araucania_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_araucania_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_araucania_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_araucania_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_araucania_df <- as.data.frame(table(lic_araucania$COD_COM))
+colnames(lic_araucania_df) <- c('codigo_comuna','cantidad')
+
+lic_com_araucania <- mapa_comunas %>%
+  filter(codigo_region == "09") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_araucania_df)
+
+ggplot(lic_com_araucania) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-70.9, -73.5)) +
+  scale_y_continuous(limits = c(-37.5, -39.75))
+
+viv_araucania_df <- as.data.frame(table(viv_araucania$COD_COM))
+colnames(viv_araucania_df) <- c('codigo_comuna','cantidad')
+
+viv_com_araucania <- mapa_comunas %>%
+  filter(codigo_region == "09") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_araucania_df)
+
+ggplot(viv_com_araucania) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-70.9, -73.5)) +
+  scale_y_continuous(limits = c(-37.5, -39.75))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_lagos <- liceo %>% 
+  filter(COD_REG == "10") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_lagos %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_lagos %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_lagos %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_lagos %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_lagos %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_lagos %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_lagos %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_lagos %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_lagos %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_lagos %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_lagos %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_lagos %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_lagos %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_lagos_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_lagos_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_lagos_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_lagos_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_lagos <- vivienda %>% 
+  filter(COD_REG == "10") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_lagos %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_lagos %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_lagos %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_lagos %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_lagos %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_lagos %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_lagos %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_lagos %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_lagos %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_lagos %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_lagos %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_lagos %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_lagos %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_lagos_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_lagos_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_lagos_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_lagos_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_lagos_df <- as.data.frame(table(lic_lagos$COD_COM))
+colnames(lic_lagos_df) <- c('codigo_comuna','cantidad')
+
+lic_com_lagos <- mapa_comunas %>%
+  filter(codigo_region == "10") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_lagos_df)
+
+ggplot(lic_com_lagos) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-71.6, -75)) +
+  scale_y_continuous(limits = c(-44, -40.25))
+
+viv_lagos_df <- as.data.frame(table(viv_lagos$COD_COM))
+colnames(viv_lagos_df) <- c('codigo_comuna','cantidad')
+
+viv_com_lagos <- mapa_comunas %>%
+  filter(codigo_region == "10") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_lagos_df)
+
+ggplot(viv_com_lagos) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-71.6, -75)) +
+  scale_y_continuous(limits = c(-44, -40.25))
+```
+
+```{r, fig.width=12,fig.height=14}
+
+##No hay nadie que haya estudiado en Los Ríos y haya seleccionado U.Antofagasta como su alma mater
+
+
+lic_aysen <- liceo %>% 
+  filter(COD_REG == "11") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_aysen %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_aysen %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_aysen %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_aysen %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_aysen %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_aysen %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_aysen %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_aysen %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_aysen %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_aysen %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_aysen %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_aysen %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_aysen %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_aysen_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, USERENA_df)
+
+lic_carreras_aysen_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_aysen_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_aysen_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_aysen <- vivienda %>% 
+  filter(COD_REG == "11") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_aysen %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_aysen %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_aysen %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_aysen %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_aysen %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_aysen %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_aysen %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_aysen %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_aysen %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_aysen %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_aysen %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_aysen %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_aysen %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_aysen_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_aysen_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_aysen_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_aysen_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_aysen_df <- as.data.frame(table(lic_aysen$COD_COM))
+
+colnames(lic_aysen_df) <- c('codigo_comuna','cantidad')
+
+lic_com_aysen <- mapa_comunas %>%
+  filter(codigo_region == "11") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_aysen_df)
+
+ggplot(lic_com_aysen) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-71, -75.6)) +
+  scale_y_continuous(limits = c(-49.1, -43.8))
+
+viv_aysen_df <- as.data.frame(table(viv_aysen$COD_COM))
+colnames(viv_aysen_df) <- c('codigo_comuna','cantidad')
+
+viv_com_aysen <- mapa_comunas %>%
+  filter(codigo_region == "11") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_aysen_df)
+
+ggplot(viv_com_aysen) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-71, -75.6)) +
+  scale_y_continuous(limits = c(-49.1, -43.8))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_magallanes <- liceo %>% 
+  filter(COD_REG == "12") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_magallanes %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_magallanes %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_magallanes %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_magallanes %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_magallanes %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_magallanes %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_magallanes %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_magallanes %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_magallanes %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_magallanes %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_magallanes %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_magallanes %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_magallanes %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_magallanes_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_magallanes_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_magallanes_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_magallanes_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_magallanes <- vivienda %>% 
+  filter(COD_REG == "12") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_magallanes %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_magallanes %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_magallanes %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_magallanes %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_magallanes %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_magallanes %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_magallanes %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_magallanes %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_magallanes %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_magallanes %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_magallanes %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_magallanes %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_magallanes %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_magallanes_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_magallanes_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_magallanes_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_magallanes_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_magallanes_df <- as.data.frame(table(lic_magallanes$COD_COM))
+colnames(lic_magallanes_df) <- c('codigo_comuna','cantidad')
+
+lic_com_magallanes <- mapa_comunas %>%
+  filter(codigo_region == "12") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_magallanes_df)
+
+ggplot(lic_com_magallanes) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-66.1, -76)) +
+  scale_y_continuous(limits = c(-56, -48.75))
+
+viv_magallanes_df <- as.data.frame(table(viv_magallanes$COD_COM))
+colnames(viv_magallanes_df) <- c('codigo_comuna','cantidad')
+
+viv_com_magallanes <- mapa_comunas %>%
+  filter(codigo_region == "12") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_magallanes_df)
+
+ggplot(viv_com_magallanes) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-66.1, -76)) +
+  scale_y_continuous(limits = c(-56, -48.75))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_santiago <- liceo %>% 
+  filter(COD_REG == "13") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_santiago %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_santiago %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_santiago %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_santiago %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_santiago %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_santiago %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_santiago %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_santiago %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_santiago %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_santiago %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_santiago %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_santiago %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_santiago %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_santiago_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_santiago_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_santiago_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") + 
+labs(y='Cantidad de Alumnos', x='Nombre de la Comuna', title='Alma mater según Liceo', subtitle='XIII Región Metropolitana' , caption='Por Javier Díaz', fill='Institución' ) +
+coord_flip()
+
+ggplot(data=lic_carreras_santiago_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_santiago <- vivienda %>% 
+  filter(COD_REG == "13") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_santiago %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_santiago %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_santiago %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_santiago %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_santiago %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_santiago %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_santiago %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_santiago %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_santiago %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_santiago %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_santiago %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_santiago %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_santiago %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_santiago_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_santiago_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_santiago_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+labs(y='Cantidad de Alumnos', x='Nombre de la Comuna', title='Alma mater según vivienda', subtitle='XIII Región Metropolitana' , caption='Por Javier Díaz', fill='Institución' ) +
+coord_flip()
+
+ggplot(data=viv_carreras_santiago_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_santiago_df <- as.data.frame(table(lic_santiago$COD_COM))
+
+colnames(lic_santiago_df) <- c('codigo_comuna','cantidad')
+
+lic_com_santiago <- mapa_comunas %>%
+  filter(codigo_region == "13") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_santiago_df)
+
+ggplot(lic_com_santiago) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Dens. Alumnos") +
+  labs(x='Latitud', y='Longitud', title='Estudiantes en la educación superior según colegio', subtitle='XIII Región Metropolitana' , caption='Por Javier Díaz') +
+  scale_x_continuous(limits = c(-69.75, -71.75)) +
+  scale_y_continuous(limits = c(-32.9, -34.3))
+
+viv_santiago_df <- as.data.frame(table(viv_santiago$COD_COM))
+colnames(viv_santiago_df) <- c('codigo_comuna','cantidad')
+
+viv_com_santiago <- mapa_comunas %>%
+  filter(codigo_region == "13") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_santiago_df)
+
+ggplot(viv_com_santiago) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Dens. Alumnos") +
+  labs(x='Latitud', y='Longitud', title='Estudiantes en la educación superior según vivienda', subtitle='XIII Región Metropolitana' , caption='Por Javier Díaz') +
+  scale_x_continuous(limits = c(-69.75, -71.75)) +
+  scale_y_continuous(limits = c(-32.9, -34.3))
+
+```
+
+```{r, fig.width=12,fig.height=14}
+
+##No hay nadie que haya estudiado en Los Ríos y haya seleccionado U.Serena como su alma mater
+
+lic_rios <- liceo %>% 
+  filter(COD_REG == "14") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_rios %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_rios %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_rios %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_rios %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_rios %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_rios %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_rios %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_rios %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_rios %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_rios %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_rios %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_rios %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_rios_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df)
+
+lic_carreras_rios_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_rios_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_rios_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_rios <- vivienda %>% 
+  filter(COD_REG == "14") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_rios %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_rios %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_rios %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_rios %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_rios %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_rios %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_rios %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_rios %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_rios %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_rios %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_rios %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_rios %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_rios %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_rios_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_rios_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_rios_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_rios_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_rios_df <- as.data.frame(table(lic_rios$COD_COM))
+
+colnames(lic_rios_df) <- c('codigo_comuna','cantidad')
+
+lic_com_rios <- mapa_comunas %>%
+  filter(codigo_region == "14") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_rios_df)
+
+ggplot(lic_com_rios) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-71.6, -73.75)) +
+  scale_y_continuous(limits = c(-40.75, -39.3))
+
+viv_rios_df <- as.data.frame(table(viv_rios$COD_COM))
+
+colnames(viv_rios_df) <- c('codigo_comuna','cantidad')
+
+viv_com_rios <- mapa_comunas %>%
+  filter(codigo_region == "14") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_rios_df)
+
+ggplot(viv_com_rios) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-71.6, -73.75)) +
+  scale_y_continuous(limits = c(-40.75, -39.3))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_arica <- liceo %>% 
+  filter(COD_REG == "15") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_arica %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_arica %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_arica %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_arica %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_arica %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_arica %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_arica %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_arica %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_arica %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_arica %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_arica %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_arica %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_arica %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_arica_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_arica_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_arica_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_arica_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_arica <- vivienda %>% 
+  filter(COD_REG == "15") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_arica %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_arica %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_arica %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_arica %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_arica %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_arica %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_arica %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_arica %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_arica %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_arica %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_arica %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_arica %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_arica %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_arica_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_arica_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_arica_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=viv_carreras_arica_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, message=FALSE}
+lic_arica_df <- as.data.frame(table(lic_arica$COD_COM))
+
+colnames(lic_arica_df) <- c('codigo_comuna','cantidad')
+
+lic_com_arica <- mapa_comunas %>%
+  filter(codigo_region == "15") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_arica_df)
+
+ggplot(lic_com_arica) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio..") +
+  scale_x_continuous(limits = c(-68.95, -70.4)) +
+  scale_y_continuous(limits = c(-17.5, -19.25))
+
+viv_arica_df <- as.data.frame(table(viv_arica$COD_COM))
+
+colnames(viv_arica_df) <- c('codigo_comuna','cantidad')
+
+viv_com_arica <- mapa_comunas %>%
+  filter(codigo_region == "15") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_arica_df)
+
+ggplot(viv_com_arica) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-68.95, -70.4)) +
+  scale_y_continuous(limits = c(-17.5, -19.25))
+```
+
+```{r, fig.width=12,fig.height=14}
+lic_nuble <- liceo %>% 
+  filter(COD_REG == "16") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- lic_nuble %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- lic_nuble %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- lic_nuble %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- lic_nuble %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- lic_nuble %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- lic_nuble %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- lic_nuble %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- lic_nuble %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- lic_nuble %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- lic_nuble %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- lic_nuble %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- lic_nuble %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- lic_nuble %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+lic_universitarios_nuble_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+lic_carreras_nuble_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=lic_universitarios_nuble_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+ggplot(data=lic_carreras_nuble_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+
+
+viv_nuble <- vivienda %>% 
+  filter(COD_REG == "16") %>% 
+  group_by(COD_COM)
+
+estudiantes_UDD <- viv_nuble %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_COM)
+estudiantes_USACH <- viv_nuble %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_COM)
+estudiantes_PUC <- viv_nuble %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_COM)
+estudiantes_UCHILE <- viv_nuble %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_COM)
+estudiantes_UCONCE <- viv_nuble %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_COM)
+estudiantes_UVALPO <- viv_nuble %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_COM)
+estudiantes_UANDES <- viv_nuble %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_COM)
+estudiantes_UMAG <- viv_nuble %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_COM)
+estudiantes_UANTO <- viv_nuble %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_COM)
+estudiantes_USERENA <- viv_nuble %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_COM)
+
+
+estudiantes_medicina <- viv_nuble %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_COM)
+estudiantes_derecho <- viv_nuble %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_COM)
+estudiantes_ingenieria <- viv_nuble %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_COM)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$NOM_COM))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('nom_comuna','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$NOM_COM))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('nom_comuna','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$NOM_COM))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('nom_comuna','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$NOM_COM))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('nom_comuna','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$NOM_COM))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('nom_comuna','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$NOM_COM))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('nom_comuna','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$NOM_COM))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('nom_comuna','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$NOM_COM))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('nom_comuna','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$NOM_COM))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('nom_comuna','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$NOM_COM))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('nom_comuna','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$NOM_COM))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('nom_comuna','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$NOM_COM))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('nom_comuna','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$NOM_COM))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('nom_comuna','alumnos','carrera')
+
+
+viv_universitarios_nuble_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+viv_carreras_nuble_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+
+ggplot(data=viv_universitarios_nuble_df, aes(x=nom_comuna, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position="stack") +
+labs(y='Cantidad de Alumnos', x='Nombre de la Comuna', title='Alma mater según vivienda', subtitle='XVI Región de Ñuble' , caption='Por Javier Díaz', fill='Institución' ) +
+coord_flip()
+
+ggplot(data=viv_carreras_nuble_df, aes(x=nom_comuna, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+labs(y='Cantidad de Alumnos', x='Nombre de la Comuna', title='Carrera cursada según vivienda', subtitle='XVI Región de Ñuble' , caption='Por Javier Díaz', fill='Carrera' ) +
+coord_flip()
+
+```
+
+```{r message=FALSE}
+lic_nuble_df <- as.data.frame(table(lic_nuble$COD_COM))
+
+colnames(lic_nuble_df) <- c('codigo_comuna','cantidad')
+
+lic_com_nuble <- mapa_comunas %>%
+  filter(codigo_region == "16") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(lic_nuble_df)
+
+ggplot(lic_com_nuble) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_lic), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según colegio.") +
+  scale_x_continuous(limits = c(-72.9, -71)) +
+  scale_y_continuous(limits = c(-36, -37.2))
+
+viv_nuble_df <- as.data.frame(table(viv_nuble$COD_COM))
+colnames(viv_nuble_df) <- c('codigo_comuna','cantidad')
+
+viv_com_nuble <- mapa_comunas %>%
+  filter(codigo_region == "16") %>%
+  left_join(
+    codigos_territoriales %>%
+      select(matches("comuna"))
+  ) %>%
+  left_join(viv_nuble_df)
+
+ggplot(viv_com_nuble) + 
+  geom_sf(aes(fill = cantidad, geometry = geometry)) +
+  scale_fill_gradientn(colours = rev(paleta_viv), name = "Cant.") +
+  labs(title = "Estudiantes en la educacion superior según vivienda.") +
+  scale_x_continuous(limits = c(-72.9, -71)) +
+  scale_y_continuous(limits = c(-36, -37.2))
+```
+
+```{r, fig.width=12,fig.height=14}
+estudiantes_UDD <- liceo %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_REG)
+estudiantes_USACH <- liceo %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_REG)
+estudiantes_PUC <- liceo %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_REG)
+estudiantes_UCHILE <- liceo %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_REG)
+estudiantes_UCONCE <- liceo %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_REG)
+estudiantes_UVALPO <- liceo %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_REG)
+estudiantes_UANDES <- liceo %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_REG)
+estudiantes_UMAG <- liceo %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_REG)
+estudiantes_UANTO <- liceo %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_REG)
+estudiantes_USERENA <- liceo %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_REG)
+
+
+estudiantes_medicina <- liceo %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_REG)
+estudiantes_derecho <- liceo %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_REG)
+estudiantes_ingenieria <- liceo %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_REG)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$COD_REG))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('cod_region','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$COD_REG))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('cod_region','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$COD_REG))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('cod_region','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$COD_REG))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('cod_region','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$COD_REG))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('cod_region','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$COD_REG))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('cod_region','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$COD_REG))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('cod_region','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$COD_REG))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('cod_region','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$COD_REG))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('cod_region','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$COD_REG))
+USERENA_df$institucion <- 'USERENA'
+colnames(USERENA_df) <- c('cod_region','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$COD_REG))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('cod_region','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$COD_REG))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('cod_region','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$COD_REG))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('cod_region','alumnos','carrera')
+
+
+carreras_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+universitarios_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+ggplot(data=universitarios_df, aes(x=cod_region, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position=position_dodge(0.5)) +
+coord_flip()
+
+ggplot(data=carreras_df, aes(x=cod_region, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+coord_flip()
+```
+
+```{r, fig.width=12,fig.height=14}
+estudiantes_UDD <- vivienda %>%
+  filter(NOM_INS == 'UDD') %>% 
+  group_by(COD_REG)
+estudiantes_USACH <- vivienda %>% 
+  filter(NOM_INS == 'USACH') %>% 
+  group_by(COD_REG)
+estudiantes_PUC <- vivienda %>%
+  filter(NOM_INS == 'PUC') %>% 
+  group_by(COD_REG)
+estudiantes_UCHILE <- vivienda %>% 
+  filter(NOM_INS == 'UCHILE') %>% 
+  group_by(COD_REG)
+estudiantes_UCONCE <- vivienda %>%
+  filter(NOM_INS == 'UCONCE') %>% 
+  group_by(COD_REG)
+estudiantes_UVALPO <- vivienda %>% 
+  filter(NOM_INS == 'UVALPO') %>% 
+  group_by(COD_REG)
+estudiantes_UANDES <- vivienda %>%
+  filter(NOM_INS == 'UANDES') %>% 
+  group_by(COD_REG)
+estudiantes_UMAG <- vivienda %>% 
+  filter(NOM_INS == 'UMAG') %>% 
+  group_by(COD_REG)
+estudiantes_UANTO <- vivienda %>%
+  filter(NOM_INS == 'UANTO') %>% 
+  group_by(COD_REG)
+estudiantes_USERENA <- vivienda %>% 
+  filter(NOM_INS == 'USERENA') %>% 
+  group_by(COD_REG)
+
+
+estudiantes_medicina <- liceo %>%
+  filter(CAR == 'MEDICINA') %>% 
+  group_by(COD_REG)
+estudiantes_derecho <- liceo %>% 
+  filter(CAR == 'DERECHO') %>% 
+  group_by(COD_REG)
+estudiantes_ingenieria <- liceo %>%
+  filter(CAR == 'INGENIERIA') %>% 
+  group_by(COD_REG)
+
+
+UDD_df <- as.data.frame(table(estudiantes_UDD$COD_REG))
+UDD_df$institucion <- 'UDD'
+colnames(UDD_df) <- c('cod_region','alumnos','institucion')
+
+USACH_df <- as.data.frame(table(estudiantes_USACH$COD_REG))
+USACH_df$institucion <- 'USACH' 
+colnames(USACH_df) <- c('cod_region','alumnos','institucion')
+
+PUC_df <- as.data.frame(table(estudiantes_PUC$COD_REG))
+PUC_df$institucion <- 'PUC'
+colnames(PUC_df) <- c('cod_region','alumnos','institucion')
+
+UCHILE_df <- as.data.frame(table(estudiantes_UCHILE$COD_REG))
+UCHILE_df$institucion <- 'UCHILE' 
+colnames(UCHILE_df) <- c('cod_region','alumnos','institucion')
+
+UCONCE_df <- as.data.frame(table(estudiantes_UCONCE$COD_REG))
+UCONCE_df$institucion <- 'UCONCE'
+colnames(UCONCE_df) <- c('cod_region','alumnos','institucion')
+
+UVALPO_df <- as.data.frame(table(estudiantes_UVALPO$COD_REG))
+UVALPO_df$institucion <- 'UVALPO' 
+colnames(UVALPO_df) <- c('cod_region','alumnos','institucion')
+
+UANDES_df <- as.data.frame(table(estudiantes_UANDES$COD_REG))
+UANDES_df$institucion <- 'UANDES'
+colnames(UANDES_df) <- c('cod_region','alumnos','institucion')
+
+UMAG_df <- as.data.frame(table(estudiantes_UMAG$COD_REG))
+UMAG_df$institucion <- 'UMAG' 
+colnames(UMAG_df) <- c('cod_region','alumnos','institucion')
+
+UANTO_df <- as.data.frame(table(estudiantes_UANTO$COD_REG))
+UANTO_df$institucion <- 'UANTO'
+colnames(UANTO_df) <- c('cod_region','alumnos','institucion')
+
+USERENA_df <- as.data.frame(table(estudiantes_USERENA$COD_REG))
+USERENA_df$institucion <- 'USERENA' 
+colnames(USERENA_df) <- c('cod_region','alumnos','institucion')
+
+
+MEDICINA_df <- as.data.frame(table(estudiantes_medicina$COD_REG))
+MEDICINA_df$carrera <- 'MEDICINA'
+colnames(MEDICINA_df) <- c('cod_region','alumnos','carrera')
+
+DERECHO_df <- as.data.frame(table(estudiantes_derecho$COD_REG))
+DERECHO_df$carrera <- 'DERECHO'
+colnames(DERECHO_df) <- c('cod_region','alumnos','carrera')
+
+INGENIERIA_df <- as.data.frame(table(estudiantes_ingenieria$COD_REG))
+INGENIERIA_df$carrera <- 'INGENIERIA'
+colnames(INGENIERIA_df) <- c('cod_region','alumnos','carrera')
+
+
+carreras_df <- rbind(MEDICINA_df, DERECHO_df, INGENIERIA_df)
+
+universitarios_df <- rbind(UDD_df, USACH_df, PUC_df, UCHILE_df, UCONCE_df, UVALPO_df, UANDES_df, UMAG_df, UANTO_df, USERENA_df)
+
+ggplot(data=universitarios_df, aes(x=cod_region, y=alumnos, fill=institucion)) +
+geom_bar(stat="identity", position=position_dodge(0.5)) +
+labs(y='Cantidad de Alumnos', x='Código de Región', title='Alma mater según vivienda', subtitle='XVI Región de Ñuble' , caption='Por Javier Díaz', fill='Institución' ) +
+coord_flip()
+
+ggplot(data=carreras_df, aes(x=cod_region, y=alumnos, fill=carrera)) +
+geom_bar(stat="identity", position="stack") +
+labs(y='Cantidad de Alumnos', x='Código de Región', title='Carrera según vivienda', subtitle='XVI Región de Ñuble' , caption='Por Javier Díaz', fill='Carrera' ) +
+coord_flip()
+
+```
+
